@@ -5,6 +5,10 @@ This is educational project in the third semester at MIPT.
 
 Usmanov Abubakr
 
+## Environment
+
+Vim (Linux terminal)
+
 ## Tasks
 1.c(how to use stat)
 
