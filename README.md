@@ -6,9 +6,11 @@ This is educational project in the third semester at MIPT.
 Usmanov Abubakr
 
 ## Tasks
-1.c(stat)
-2_1.c(open/write/close)
-2_2.c
+1.c(how to use stat)
+
+2_1.c(how to use open/write/close)
+
+2_2.c(dprintf instead of write)
 
 ## Branches
 Master - there will be solved tasks
