@@ -2,6 +2,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
+
+#ifdef S_BLKSIZE
+#define BL_SIZE S_BLKSIZE
+#else
+#include <sys/param.h>
+#define BL_SIZE DEV_BSIZE
+#endif
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
@@ -19,23 +27,21 @@ int main(int argc, char** argv) {
 	printf("Information for %s\n", argv[1]);
 	printf("---------------------------\n");
 	printf("File Size: \t\t%ld bytes\n", fileStat.st_size);
-	printf("Number of Links: \t%ld\n",fileStat.st_nlink);
-	printf("File inode: \t\t%ld\n",fileStat.st_ino);
-
-	printf("File Permissions: \t");
-	printf( (S_ISDIR(fileStat.st_mode)) ? "d" : "-");
-	printf( (fileStat.st_mode & S_IRUSR) ? "r" : "-");
-	printf( (fileStat.st_mode & S_IWUSR) ? "w" : "-");
-	printf( (fileStat.st_mode & S_IXUSR) ? "x" : "-");
-	printf( (fileStat.st_mode & S_IRGRP) ? "r" : "-");
-	printf( (fileStat.st_mode & S_IWGRP) ? "w" : "-");
-	printf( (fileStat.st_mode & S_IXGRP) ? "x" : "-");
-	printf( (fileStat.st_mode & S_IROTH) ? "r" : "-");
-	printf( (fileStat.st_mode & S_IWOTH) ? "w" : "-");
-	printf( (fileStat.st_mode & S_IXOTH) ? "x" : "-");
-	printf("\n\n");
-
-	printf("The file %s a symbolic link\n", (S_ISLNK(fileStat.st_mode)) ? "is" : "is not");
-
-    return 0;
+	printf("File type: \n");
+	switch (fileStat.st_mode & S_IFMT) {
+	case S_IFBLK:  printf("block device\n");	break;
+	case S_IFCHR:  printf("character device\n");	break;
+	case S_IFDIR:  printf("directory\n");		break;
+	case S_IFIFO:  printf("FIFO/pipe\n");		break;
+	case S_IFLNK:  printf("symlink\n");		break;
+	case S_IFREG:  printf("regular file\n");	break;
+	case S_IFSOCK: printf("socket\n");		break;
+	default: printf("unknown?\n");			break;
+	}
+	printf("Mode: %06o\n", fileStat.st_mode);
+	printf("Space used: %llu\n", (unsigned long long)fileStat.st_blocks * BL_SIZE);
+	printf("Last changed: %s", ctime(&fileStat.st_ctime));
+	printf("Last access: %s", ctime(&fileStat.st_atime));
+	printf("Last modification: %s", ctime(&fileStat.st_mtime));
+	return 0;
 }
