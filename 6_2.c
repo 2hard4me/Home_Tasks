@@ -68,7 +68,7 @@ const char *PRINT_DIR_TYPE(__uint8_t type) {
 
 int main(int argc, char *argv[]) {
 	if (argc > 2) {
-		printf("Usage: %s", argv[1]);
+		fprintf(stderr, "Usage: %s", argv[1]);
 		return 1;
 	}
 
@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
 	int DirFileDesc;
 	
 	if ((DirFileDesc = dirfd(dir)) < 0) {
+		close(dir);
 		handle_error("Failed to dirfd\n");
 	}
 	
@@ -102,6 +103,7 @@ int main(int argc, char *argv[]) {
 		printf("File type:\t");
 		if ((sd->d_type) == DT_UNKNOWN) {
 			if (fstatat(DirFileDesc, sd->d_name, &fileStat, 0) < 0) {
+				close(dir);
 				handle_error("Failed to stat\n");
 			}
 			PRINT_TYPE(fileStat.st_mode);
@@ -113,6 +115,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (close(DirFileDesc) < 0) {
+		close(dir);
 		handle_error("Failed to close Directory file descriptor\n");
 	}
 
