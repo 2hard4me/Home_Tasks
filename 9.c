@@ -1,3 +1,8 @@
+//statfs() является BSD-и Linux-специфичным, с различными структурами на каждом
+
+//statvfs() ,он является стандартным POSIX и лучше обрабатывает большие размеры файлов.
+//
+
 #include <stdio.h>
 #include <sys/vfs.h>
 #include <sys/statvfs.h>
