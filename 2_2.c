@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
 
 	if (numofchpr < 0) {
 		perror("Error");
+		close(filedesc);
 		return 1;
 	}
 
