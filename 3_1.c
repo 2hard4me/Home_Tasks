@@ -6,7 +6,7 @@
 #include <string.h>
 #include <malloc.h>
 
-#define N 1024
+#define N 65536
 
 
 int main(int argc, char** argv) {
