@@ -66,7 +66,7 @@ const char *PRINT_DIR_TYPE(__uint8_t type) {
 
 int main(int argc, char *argv[]) {
 	if (argc > 2) {
-		printf("Usage: %s", argv[1]);
+		printf("Usage: %s [directory]/n", argv[1]);
 		return 1;
 	}
 
@@ -83,15 +83,24 @@ int main(int argc, char *argv[]) {
 	}
 
 	dir = opendir(dirname);
-
+	
 	if (dir == NULL) {
 		handle_error("Unable to open directory\n");
+	}
+	
+	int DirFileDesc;
+	
+	if ((DirFileDesc = dirfd(dir)) < 0) {
+		closedir(dir);
+		handle_error("Failed to dirfd\n");
 	}
 	
 	while ((sd = readdir(dir)) != NULL) {
 		printf("File type:\t");
 		if ((sd->d_type) == DT_UNKNOWN) {
-			if (lstat(sd->d_name, &fileStat) < 0) {
+			if (fstatat(DirFileDesc, sd->d_name, &fileStat, 0) < 0) {
+				close(DirFileDesc);
+				closedir(dir);
 				handle_error("Failed to stat\n");
 			}
 			PRINT_TYPE(fileStat.st_mode);
@@ -103,7 +112,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (closedir(dir) < 0) {
+		close(DirFileDesc);
 		handle_error("Failed to close directory\n");
+	}
+	
+	if(close(DirFileDesc) < 0) {
+		handle_error("Failed to close file descriptor");	
 	}
 	
 	return 0;
