@@ -4,12 +4,14 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
+
 #define N 1024
 
 
 int main(int argc, char** argv) {
 	if (argc != 3) {
-		printf("Usage: %s source file target\n", argv[0]);
+		fprintf(stderr, "Usage: %s source file target\n", argv[0]);
 		return 1;
 	}
 	
@@ -42,7 +44,8 @@ int main(int argc, char** argv) {
 	
 	int size = fileStat.st_size;
 
-	char buf[N];
+	char *buf;
+	buf = (char*)malloc(N * sizeof(char));
 
 	size_t readbytes, writebytes, bytes;
 
@@ -53,6 +56,7 @@ int main(int argc, char** argv) {
 			perror("Failed to read file to read");
 			close(sourcefd);
 			close(destinationfd);
+			free(buf);
 			return 2;
 		}
 		
@@ -69,6 +73,7 @@ int main(int argc, char** argv) {
 				perror("Failed to write");
 				close(sourcefd);
 				close(destinationfd);
+				free(buf);
 				return 2;
 			}
 
@@ -78,6 +83,7 @@ int main(int argc, char** argv) {
 		
 	}
 	fsync(destinationfd);
+	free(buf);
 	if (close(sourcefd) < 0) {
 		perror("Failed to close source file");
 		return 3;	
