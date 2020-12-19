@@ -12,6 +12,10 @@
 
 
 int main(int argc, char *argv[]) {
+	if (argc > 2) {
+		fprintf(stderr, "Usage: %s too many arguments\n");
+		return 1;
+	}
 	int length, i = 0;
 	int filedesc;
 	int watchdesc;
@@ -29,6 +33,7 @@ int main(int argc, char *argv[]) {
 		length = read(filedesc, buf, EVENT_BUF_LEN);
 		if (length < 0) {
 			close(filedesc);
+			close(watchdesc);
 			handle_error("Error: read");
 		}
 
@@ -62,6 +67,9 @@ int main(int argc, char *argv[]) {
 		handle_error("Error: inotify_rm_watch");
 	}
 	if (close(filedesc) < 0) {
+		handle_error("Error: close");
+	}
+	if (close(watchdesc) < 0){
 		handle_error("Error: close");
 	}
 	return 0;
