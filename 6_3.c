@@ -5,13 +5,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <malloc.h>
 
 #define handle_error(message) \
 	do { perror(message); exit(EXIT_FAILURE); } while (0);
 
-#define N 1024
-
-
+#define N 65536
 
 
 struct linux_dirent {
@@ -79,12 +78,13 @@ const char *PRINT_DIR_TYPE(__uint8_t type) {
 
 
 int main(int argc, char *argv[]) {
-	if (argc > 2) {
-		printf("Usage: %s", argv[1]);
+	if (argc != 2) {
+		fprintf(stderr, "Usage: %s directory\n", argv[0]);
 		return 1;
 	}
 	int filedesc, nread;
-	char buf[N];
+	char *buf;
+	buf = (char*)malloc(N * sizeof(char));
 	struct linux_dirent *d;
 	int bpos;
 	char d_type;
@@ -106,6 +106,8 @@ int main(int argc, char *argv[]) {
 	for ( ; ; ) {
 		nread = syscall(SYS_getdents, filedesc, buf, N);
 		if (nread < 0) {
+			close(filedesc);
+			free(buf);
 			handle_error("Error: getdents\n");
 		}
 
@@ -121,7 +123,9 @@ int main(int argc, char *argv[]) {
 
 			printf("File type:\t");
 			if (d_type == DT_UNKNOWN) {
-				if (lstat(d->d_name, &fileStat) < 0) {
+				if (fstatat(filedesc, d->d_name, &fileStat, 0) < 0) {
+					close(filedesc);
+					free(buf);
 					handle_error("Failed to stat\n");
 				}
 				PRINT_TYPE(fileStat.st_mode);
@@ -133,6 +137,11 @@ int main(int argc, char *argv[]) {
 
 			bpos += d->d_reclen;
 		}
+	}
+	free(buf);
+	
+	if (close(filedesc) < 0) {
+		handle_error("Failed to close\n");	
 	}
 	
 	return 0;
