@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
 		i = 0;
 		length = read(filedesc, buf, EVENT_BUF_LEN);
 		if (length < 0) {
+			close(filedesc);
 			handle_error("Error: read");
 		}
 
