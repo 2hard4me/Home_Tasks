@@ -25,14 +25,15 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-	int sourcefd = open(argv[1], O_RDONLY);
+	int sourcefd = open(argv[1], O_RDONLY); // file descriptor of source file
 	
 	if (sourcefd < 0) {
 		perror("Failed to open file to copy");
 		return 2;
 	}
 
-	int destinationfd = open(argv[2], O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); // set mode -rw-r--r--
+	int destinationfd = open(argv[2], O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); //file descriptor of destination file
+	// set mode -rw-r--r--
 	if (destinationfd < 0) {
 		perror("Failed to open file to write");
 		close(sourcefd);
@@ -46,7 +47,7 @@ int main(int argc, char** argv) {
 	size_t readbytes, writebytes, bytes;
 
 	while (1) {
-		readbytes = read(sourcefd, buf, sizeof(buf));
+		readbytes = read(sourcefd, buf, sizeof(buf)); //Returns the number of bytes that were read
 
 		if (readbytes < 0) {
 			perror("Failed to read file to read");
