@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
 	int destinationfd = open(argv[2], O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); // set mode -rw-r--r--
 	if (destinationfd < 0) {
 		perror("Failed to open file to write");
+		close(sourcefd);
 		return 2;
 	}
 	
