@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
 		handle_error("Error: statfs");
 	}
 
-	printf("Total: %lu \n", buf.f_blocks * buf.f_bsize);
-	printf("Available: %lu \n", buf.f_bsize * buf.f_bavail);
-	printf("Used: %lu \n", buf.f_bsize * (buf.f_blocks - buf.f_bavail));
+	printf("Total memory: %lu \n", buf.f_blocks * buf.f_bsize);
+	printf("Available memory: %lu \n", buf.f_bsize * buf.f_bavail);
+	printf("Used memory: %lu \n", buf.f_bsize * (buf.f_blocks - buf.f_bavail));
        
 	return 0;
 }
