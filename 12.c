@@ -43,24 +43,6 @@ int main(int argc, char *argv[]) {
 
 	printf("Group name: %s\n", group_name);
 	
-	gid_t *group;
-	int ngroups;
-	long ngroups_max;
-	
-	ngroups_max = sysconf(_SC_NGROUPS_MAX) + 1;
-	group = (gid_t *)malloc(ngroups_max *sizeof(gid_t));
-
-	ngroups = getgroups(ngroups_max, group);
-	printf("groups:");
-	struct group *grps;
-	for (int i = 0; i < ngroups; i++) {
-		printf("%d", group[i]);
-		if ((grps = getgrgid(group[i])) == 0) {
-			printf("(err)");
-		}	
-		printf("(%s);", grps->gr_name);
-	}
-	printf("\n");	
 	return 0;
 	
 }
