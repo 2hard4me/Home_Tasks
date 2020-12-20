@@ -4,37 +4,45 @@
 #include <sys/types.h>
 #include <sys/inotify.h>
 #include <unistd.h>
+#include <limits.h>
 
-#define EVENT_SIZE ( sizeof (struct inotify_event) )
+#define EVENT_SIZE ( sizeof (struct inotify_event) + NAME_MAX + 1 )
 #define EVENT_BUF_LEN ( 1024 * (EVENT_SIZE + 16) )
-#define handle_error(message) \
-	do { perror(message); exit(EXIT_FAILURE); } while(0)
 
 
 int main(int argc, char *argv[]) {
-	if (argc > 2) {
-		fprintf(stderr, "Usage: %s too many arguments\n");
+	if (argc != 2) {
+		fprintf(stderr, "Usage: %s [dir]\n", argv[0]);
 		return 1;
 	}
-	int length, i = 0;
+	ssize_t length, i;
 	int filedesc;
 	int watchdesc;
-	char buf[EVENT_BUF_LEN];
+	char *buf = malloc(EVENT_BUF_LEN);
 
 	filedesc = inotify_init();
 
 	if (filedesc < 0) {
-		handle_error("Error: inotify init");
+		perror("Error: inotify init");
+		return 1;
 	}
 
 	watchdesc = inotify_add_watch(filedesc, ".", IN_MODIFY | IN_CREATE | IN_DELETE);
+	
+	if (watchdesc < 0) {
+		perror("Error: inotify_add_watch");
+		close(filedesc);
+		return 1;
+	}
+	
 	while (1) {
 		i = 0;
 		length = read(filedesc, buf, EVENT_BUF_LEN);
 		if (length < 0) {
+			perror("Error: read");
 			close(filedesc);
 			close(watchdesc);
-			handle_error("Error: read");
+			return 1;
 		}
 
 		while (i < length) {
@@ -64,13 +72,19 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	if (inotify_rm_watch (filedesc, watchdesc) < 0) {
-		handle_error("Error: inotify_rm_watch");
+		perror("Error: inotify_rm_watch");
+		close(filedesc);
+		close(watchdesc);
+		return 1;
 	}
 	if (close(filedesc) < 0) {
-		handle_error("Error: close");
+		perror("Error: close");
+		close(watchdesc);
+		return 1;
 	}
 	if (close(watchdesc) < 0){
-		handle_error("Error: close");
+		perror("Error: close");
+		return 1;
 	}
 	return 0;
 }
